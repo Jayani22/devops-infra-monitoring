@@ -1,0 +1,46 @@
+- name: Install and Configure Docker
+  hosts: private
+  become: yes
+
+  tasks:
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Start and enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Initialize Docker Swarm
+      shell: docker swarm init
+      register: swarm_output
+      ignore_errors: yes
+
+    - name: Check Swarm status
+      shell: docker info --format '{{ "{{.Swarm.LocalNodeState}}" }}'
+      register: swarm_state
+      changed_when: false
+
+    - name: Initialize Docker Swarm if not active
+      shell: docker swarm init
+      when: swarm_state.stdout != "active"
+
+    - name: Show Swarm Status
+      shell: docker info | grep -i swarm
+      register: swarm_status
+      changed_when: false
+
+    - name: Print Swarm Status
+      debug:
+        var: swarm_status.stdout_lines

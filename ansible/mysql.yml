@@ -1,0 +1,54 @@
+- name: Install and Configure MySQL
+  hosts: private
+  become: yes
+
+  tasks:
+
+    - name: Install MySQL and dependencies
+      apt:
+        name:
+          - mysql-server
+          - python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: Create database using socket auth
+      community.mysql.mysql_db:
+        name: sampledb
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create application user
+      community.mysql.mysql_user:
+        name: appuser
+        password: apppass
+        priv: "sampledb.*:ALL"
+        host: localhost
+        state: present
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+
+    - name: Create employees table
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_db: sampledb
+        query: |
+          CREATE TABLE IF NOT EXISTS employees (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100),
+            role VARCHAR(100)
+          );
+
+    - name: Insert sample data
+      community.mysql.mysql_query:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        login_db: sampledb
+        query: |
+          INSERT INTO employees (name, role) VALUES
+          ('Bharathi', 'DevOps Engineer'),
+          ('Anil', 'Backend Developer');

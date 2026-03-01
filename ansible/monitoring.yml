@@ -1,0 +1,75 @@
+- name: Deploy Monitoring Stack
+  hosts: private
+  become: yes
+
+  tasks:
+
+    # ----------------------------
+    # Install Docker (Simple Way)
+    # ----------------------------
+
+    - name: Install Docker using official script
+      shell: curl -fsSL https://get.docker.com | sh
+      args:
+        executable: /bin/bash
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    # ----------------------------
+    # Create Monitoring Directory
+    # ----------------------------
+
+    - name: Create monitoring directory
+      file:
+        path: /home/ubuntu/monitoring
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+
+    # ----------------------------
+    # Copy Required Files
+    # ----------------------------
+
+    - name: Copy docker-compose file
+      copy:
+        src: monitoring/docker-compose.yml
+        dest: /home/ubuntu/monitoring/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy prometheus config
+      copy:
+        src: monitoring/prometheus.yml
+        dest: /home/ubuntu/monitoring/prometheus.yml
+        owner: ubuntu
+        group: ubuntu
+        mode: '0644'
+
+    - name: Copy MySQL exporter config
+      copy:
+        src: monitoring/mysql-exporter.cnf
+        dest: /home/ubuntu/monitoring/mysql-exporter.cnf
+        owner: ubuntu
+        group: ubuntu
+        mode: '0600'
+
+    # ----------------------------
+    # Start Monitoring Stack
+    # ----------------------------
+
+    - name: Start monitoring stack using Docker Compose
+      shell: sudo docker compose up -d
+      args:
+        chdir: /home/ubuntu/monitoring
