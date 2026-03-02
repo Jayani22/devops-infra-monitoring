@@ -22,11 +22,6 @@
         groups: docker
         append: yes
 
-    - name: Initialize Docker Swarm
-      shell: docker swarm init
-      register: swarm_output
-      ignore_errors: yes
-
     - name: Check Swarm status
       shell: docker info --format '{{ "{{.Swarm.LocalNodeState}}" }}'
       register: swarm_state
