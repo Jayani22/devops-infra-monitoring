@@ -50,18 +50,19 @@
           );
 
     - name: Insert sample data safely
-      community.mysql.mysql_query:
-        login_unix_socket: /var/run/mysqld/mysqld.sock
-        login_db: "{{ mysql_db }}"
-        query: |
-          INSERT INTO employees (name, role)
-          SELECT 'Jayani', 'DevOps Engineer'
-          WHERE NOT EXISTS (
-            SELECT 1 FROM employees WHERE name='Jayani'
-          );
+      shell: |
+       mysql -u root -S /var/run/mysqld/mysqld.sock {{ mysql_db }} <<EOF
+       INSERT INTO employees (name, role)
+       SELECT 'Jayani', 'DevOps Engineer'
+       WHERE NOT EXISTS (
+         SELECT 1 FROM employees WHERE name='Jayani'
+       );
 
-          INSERT INTO employees (name, role)
-          SELECT 'Admin', 'DB Admin'
-          WHERE NOT EXISTS (
-            SELECT 1 FROM employees WHERE name='Admin'
-          );
+       INSERT INTO employees (name, role)
+       SELECT 'Admin', 'DB Admin'
+       WHERE NOT EXISTS (
+          SELECT 1 FROM employees WHERE name='Admin'
+       );
+       EOF
+      args:
+       executable: /bin/bash
