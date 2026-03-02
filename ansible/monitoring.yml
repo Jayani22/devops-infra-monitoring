@@ -4,9 +4,7 @@
 
   tasks:
 
-    # ----------------------------
     # Install Docker (Simple Way)
-    # ----------------------------
 
     - name: Install Docker using official script
       shell: curl -fsSL https://get.docker.com | sh
@@ -25,9 +23,7 @@
         groups: docker
         append: yes
 
-    # ----------------------------
     # Create Monitoring Directory
-    # ----------------------------
 
     - name: Create monitoring directory
       file:
@@ -37,9 +33,7 @@
         group: ubuntu
         mode: '0755'
 
-    # ----------------------------
     # Copy Required Files
-    # ----------------------------
 
     - name: Copy docker-compose file
       copy:
@@ -65,9 +59,7 @@
         group: ubuntu
         mode: '0600'
 
-    # ----------------------------
     # Start Monitoring Stack
-    # ----------------------------
 
     - name: Start monitoring stack using Docker Compose
       shell: sudo docker compose up -d
