@@ -57,11 +57,16 @@
         dest: /home/ubuntu/monitoring/mysql-exporter.cnf
         owner: ubuntu
         group: ubuntu
-        mode: '0600'
+        mode: '0644'
 
-    # Start Monitoring Stack
+    - name: Wait for Docker to be active
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
 
     - name: Start monitoring stack using Docker Compose
-      shell: sudo docker compose up -d
+      become: yes
+      shell: docker compose up -d
       args:
         chdir: /home/ubuntu/monitoring
